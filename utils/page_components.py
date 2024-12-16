@@ -72,6 +72,7 @@ def add_page_selector():
     st.page_link("pages/wvs_chat.py", label="World Value Survey")
     st.page_link("pages/personality_test.py", label="Personality Test")
     st.page_link("pages/own_page.py", label="Your Own Page")
+    st.page_link("pages/run_analysis.py", label="CL 2018 run analysis")
 
     # st.image("data/ressources/img/TwelveEdu.png")
 
@@ -170,3 +171,51 @@ def create_chat(to_hash, chat_class, *args, **kwargs):
     chat_hash_state = hash(to_hash)
     chat = chat_class(chat_hash_state, *args, **kwargs)
     return chat
+
+
+
+def select_runs(container, player_run_counts_df, runs_obj):
+    """
+    Allows the user to select a player and returns their run details.
+
+    Args:
+        container: Streamlit container for the select box.
+        player_run_counts_df: DataFrame with player names and run counts.
+        runs_obj: An instance of RunStats for fetching and filtering runs.
+
+    Returns:
+        DataFrame of runs for the selected player.
+    """
+    with container:
+        # Select a player from the list
+        player_list = player_run_counts_df['player'].tolist()
+        selected_player = st.selectbox("Select a player to view their runs:", player_list)
+
+    # Fetch the detailed runs for the selected player
+    detailed_runs = runs_obj.filter_runs_by_player(selected_player)
+    return selected_player, detailed_runs
+
+# def select_runs(container, player_run_counts_df, runs):
+#     """
+#     Allows the user to select a player from the sidebar and returns the player and their detailed runs.
+
+#     Args:
+#         container: Streamlit container.
+#         player_run_counts_df: DataFrame containing run counts for players.
+#         runs: RunStats object containing detailed run data.
+
+#     Returns:
+#         tuple: Selected player name and a DataFrame of their detailed runs.
+#     """
+#     # Select a player from the sidebar
+#     selected_player = container.selectbox(
+#         "Select Player",
+#         options=player_run_counts_df['player'],
+#         index=0,  # Default to the first player
+#     )
+
+#     # Filter detailed runs for the selected player
+#     detailed_runs_df = runs.filter_runs_by_player(selected_player)
+
+#     # Return the player name and their detailed run data
+#     return selected_player, detailed_runs_df

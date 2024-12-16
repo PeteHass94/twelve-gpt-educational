@@ -1,6 +1,11 @@
 """
 Entrypoint for streamlit app.
 Runs top to bottom every time the user interacts with the app (other than imports and cached functions).
+
+conda create --name streamlit_env
+conda activate streamlit_env
+pip install -r requirements.txt
+streamlit run app.py
 """
 
 # Library imports

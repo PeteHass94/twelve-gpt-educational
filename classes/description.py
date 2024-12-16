@@ -661,3 +661,62 @@ class PersonDescription(Description):
             "Finally, summarise exactly how the person compares to others in the same position. "
         )
         return [{"role": "user", "content": prompt}]
+
+
+# Updated RunDescription to accept insights
+class RunDescription(Description):
+    """
+    Description generator for player runs, incorporating visual insights.
+    """
+
+    @property
+    def gpt_examples_path(self):
+        return f"{self.gpt_examples_base}/RunExamples.xlsx"
+
+    @property
+    def describe_paths(self):
+        return [f"{self.describe_base}/RunExamples.xlsx"]
+
+    def __init__(self, player_name, run_metrics, insights):
+        """
+        Initialize RunDescription with player and metrics.
+
+        Args:
+            player_name (str): Name of the player.
+            run_metrics (pd.Series): Series containing run metrics.
+            insights (dict): Additional insights from visuals.
+        """
+        self.player_name = player_name
+        self.run_metrics = run_metrics
+        self.insights = insights
+        super().__init__()
+
+    def synthesize_text(self):
+        """
+        Create a text summary of the player's run metrics and insights.
+        """
+        description = (
+            f"Here are the run statistics for {self.player_name}: "
+            f"{self.run_metrics['forward_runs']} forward runs, "
+            f"maximum speed of {self.run_metrics['max_speed']:.2f} m/s, "
+            f"average speed of {self.run_metrics['avg_speed']:.2f} m/s, "
+            f"average run distance of {self.run_metrics['avg_distance']:.2f} meters, "
+            f"and total distance of {self.run_metrics['total_distance']:.2f} meters.\n\n"
+        )
+        description += f"Visual Insights:\n\n"
+        description += f"Pitch Plot Insights: {self.insights['pitch_insights']}\n\n"
+        description += f"Radar Plot Insights: {self.insights['radar_insights']}\n\n"
+        description += f"Distribution Insights: {self.insights['distribution_insights']}\n\n"
+        return description
+    
+    def get_prompt_messages(self):
+        """
+        Prompt GPT to generate a concise summary of run metrics.
+        """
+        prompt = (
+            "Using the statistical description enclosed with ```, "
+            "generate a concise, 4-sentence summary of the player's running performance. "
+            "Start with an overview, highlight specific strengths, describe any weaknesses, "
+            "and conclude with a comparison to other players in the match."
+        )
+        return [{"role": "user", "content": prompt}]

@@ -576,3 +576,156 @@ class DistributionPlotPersonality(Visual):
         fig.update_traces(fill='toself', marker=dict(size=5))
         # Display the plot in Streamlit
         st.plotly_chart(fig)"""
+
+class DistributionPlotRuns(Visual):
+    """
+    Creates a distribution plot for player run metrics.
+    """
+    def __init__(self, metrics, *args, **kwargs):
+        """
+        Initialize the distribution plot for player runs.
+
+        Args:
+            metrics (list): List of metrics to visualize.
+        """
+        self.metrics = metrics
+        self.marker_color = (
+            c for c in [Visual.white, Visual.bright_yellow, Visual.bright_blue]
+        )
+        self.marker_shape = (s for s in ["square", "hexagon", "diamond"])
+        super().__init__(*args, **kwargs)
+        self._setup_axes()
+
+    def _setup_axes(self, labels=["Worse", "Average", "Better"]):
+        """
+        Set up the x and y axes for the plot.
+        """
+        self.fig.update_xaxes(
+            range=[-4, 4],
+            fixedrange=True,
+            tickmode="array",
+            tickvals=[-3, 0, 3],
+            ticktext=labels,
+        )
+        self.fig.update_yaxes(
+            showticklabels=False,
+            fixedrange=True,
+            gridcolor=rgb_to_color(self.medium_green),
+            zerolinecolor=rgb_to_color(self.medium_green),
+        )
+
+    # def add_group_data(self, df_plot):
+    #     """
+    #     Add all players' data points to the plot.
+
+    #     Args:
+    #         df_plot (pd.DataFrame): DataFrame with all player metrics.
+    #     """
+    #     for i, metric in enumerate(self.metrics):
+    #         # Generate hover text for each data point
+    #         hover_text = df_plot[metric].apply(lambda x: f"{metric}: {x:.2f}").tolist()
+            
+    #         # Add scatter trace for this metric
+    #         self.fig.add_trace(
+    #             go.Scatter(
+    #                 x=df_plot[f"{metric}_Z"],
+    #                 y=np.ones(len(df_plot)) * i,
+    #                 mode="markers",
+    #                 marker=dict(
+    #                     color=rgb_to_color(self.bright_green, opacity=0.2),
+    #                     size=10,
+    #                 ),
+    #                 hovertext=hover_text,  # Use hover text here
+    #                 name="Other players",
+    #                 showlegend=(i == 0),
+    #             )
+    #         )
+    def add_group_data(self, df_plot):
+        """
+        Add all players' data points to the plot.
+
+        Args:
+            df_plot (pd.DataFrame): DataFrame with all player metrics.
+        """
+        for i, metric in enumerate(self.metrics):
+            # Generate hover text with player name and metric value
+            hover_text = df_plot.apply(
+                lambda row: f"Player: {row['player']}<br>{metric}: {row[metric]:.2f}" if pd.notnull(row[metric]) else f"Player: {row['player']}<br>{metric}: N/A",
+                axis=1
+            ).tolist()
+            
+            # Add scatter trace for this metric
+            self.fig.add_trace(
+                go.Scatter(
+                    x=df_plot[f"{metric}_Z"],
+                    y=np.ones(len(df_plot)) * i,
+                    mode="markers",
+                    marker=dict(
+                        color=rgb_to_color(self.bright_green, opacity=0.2),
+                        size=10,
+                    ),
+                    hovertext=hover_text,  # Use hover text here
+                    name="Other players",
+                    showlegend=(i == 0),
+                )
+            )
+
+            # Add an annotation for the metric title on the left side of each row
+            self.fig.add_annotation(
+                x=-3,  # Place the annotation outside the plot area on the left
+                y=i,
+                text=f"<b>{metric.replace('_', ' ').title()}</b>",
+                showarrow=False,
+                font=dict(
+                    color=rgb_to_color(self.white, 0.8),
+                    size=12 * self.font_size_multiplier,
+                    family="Arial"
+                ),
+                xref="x",
+                yref="y",
+                align="right",
+                xanchor="right"
+            )
+        
+    def add_player(self, player_metrics, player_name):
+        """
+        Add a specific player's metrics to the plot.
+
+        Args:
+            player_metrics (pd.Series): Player metrics for visualization.
+            player_name (str): Name of the player.
+        """
+        color = next(self.marker_color)
+        marker = next(self.marker_shape)
+
+        for i, metric in enumerate(self.metrics):
+            self.fig.add_trace(
+                go.Scatter(
+                    x=[player_metrics[f"{metric}_Z"]],
+                    y=[i],
+                    mode="markers",
+                    marker=dict(
+                        color=rgb_to_color(color, opacity=0.7),
+                        size=12,
+                        symbol=marker,
+                    ),
+                    hovertemplate=f"{metric}: {player_metrics[metric]:.2f}",
+                    name=player_name,
+                    showlegend=(i == 0),
+                )
+            )
+
+    def add_title_from_player(self, player_name):
+        """
+        Add a title to the plot based on the player.
+
+        Args:
+            player_name (str): Name of the player.
+        """
+        self.fig.update_layout(
+            title={
+                "text": f"Run Metrics Distribution for {player_name}",
+                "x": 0.5,
+                "xanchor": "center",
+            }
+        )

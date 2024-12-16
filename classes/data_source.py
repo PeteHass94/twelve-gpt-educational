@@ -576,3 +576,90 @@ class PersonStat(Stats):
         ser_metrics = self.df.squeeze()
 
         return self.data_point_class(id=id, name=name, ser_metrics=ser_metrics)
+    
+# class RunStats:
+#     """
+#     Class for processing and managing run data for players.
+#     """
+#     def __init__(self, match_id):
+#         self.match_id = match_id
+#         self.df = self.get_processed_data()
+
+#     def get_raw_data(self):
+#         # Load runs data from a Parquet file
+#         return pd.read_parquet(f"data/{self.match_id}_runs.parquet")
+
+#     def process_data(self, df_raw):
+#         # Format time columns and process data
+#         df_raw['time_start'] = pd.to_datetime(df_raw['time_start'], errors='coerce')
+#         df_raw['time_end'] = pd.to_datetime(df_raw['time_end'], errors='coerce')
+#         return df_raw
+
+#     def get_processed_data(self):
+#         # Load and process the data
+#         df_raw = self.get_raw_data()
+#         return self.process_data(df_raw)
+
+#     def calculate_run_counts(self):
+#         # Group by player and count the number of runs
+#         run_counts = self.df.groupby('player').size().sort_values(ascending=False)
+#         run_counts_df = run_counts.reset_index()
+#         run_counts_df.columns = ['Player', 'Run Count']
+#         return run_counts_df
+
+
+class RunStats(Stats):
+    """
+    Class for processing and managing run data for players, built on Stats.
+    """
+    def __init__(self, match_id):
+        self.match_id = match_id
+        super().__init__()
+
+    def get_raw_data(self):
+        # Load runs data from a Parquet file
+        return pd.read_parquet(f"data/{self.match_id}_runs.parquet")
+
+    def process_data(self, df_raw):
+        # Format time columns and process data
+        df_raw['time_start'] = pd.to_datetime(df_raw['time_start'], errors='coerce')
+        df_raw['time_end'] = pd.to_datetime(df_raw['time_end'], errors='coerce')
+        return df_raw
+
+    def calculate_run_counts(self):
+        """
+        Calculates the number of runs for each player.
+        """
+        run_counts = self.df.groupby('player').size().sort_values(ascending=False)
+        run_counts_df = run_counts.reset_index()
+        run_counts_df.columns = ['Player', 'Run Count']
+        return run_counts_df
+
+    def filter_runs_by_player(self, player_name):
+        """
+        Filters runs for a specific player.
+
+        Args:
+            player_name: Name of the player.
+
+        Returns:
+            DataFrame of runs for the selected player.
+        """
+        return self.df[self.df['player'] == player_name]
+    
+    def to_data_point(self) -> data_point.Run:
+
+        id = self.df.index[0]
+        player = self.df["player"].values[0]
+
+        # Reindexing dataframe
+        self.df.reset_index(drop=True, inplace=True)
+
+        self.df = self.df.drop(columns=["player"])
+
+        # Convert to series
+        ser_metrics = self.df.squeeze()
+
+        return self.data_point_class(id=id, player=player)
+    
+    

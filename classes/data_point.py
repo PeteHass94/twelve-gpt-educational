@@ -54,3 +54,16 @@ class Person(Stat):
         self.id = id
         self.name = name
         self.ser_metrics = ser_metrics
+        
+class Run(Stat):
+    def __init__(self, id, player, df_metrics=None):
+        """
+        Represents a single run or multiple runs by a player.
+        Args:
+            id: Identifier for the run or player.
+            player: Player's name.
+            df_metrics: DataFrame containing detailed metrics about the runs.
+        """
+        self.id = id
+        self.player = player
+        self.df_metrics = df_metrics
