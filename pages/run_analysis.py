@@ -107,11 +107,17 @@ runs = RunStats(match_id)
 
 runs.df['run_time'] = (runs.df['time_end'] - runs.df['time_start']).dt.total_seconds()
 
+runs.df['player_label'] = runs.df.apply(
+    lambda row: f"{row['player']} ({row['team_name']})", axis=1
+)
+
 # Add distance to goal calculation
 goal_x, goal_y = 100, 50  # Coordinates of the goal center
 runs.df['distance_to_goal'] = np.sqrt((runs.df['end_x'] - goal_x)**2 + (runs.df['end_y'] - goal_y)**2)
 
 runs.df['forward_runs'] = runs.df['Forward runs']
+
+
 
 # Define the opposition box coordinates
 box_x = 83
@@ -135,7 +141,7 @@ runs.df['run_angle'] = runs.df['run_angle'] * runs.df['direction_angle']
 runs.df['absolute_run_angle'] = runs.df['run_angle'] * runs.df['direction_angle']
 
 # Calculate player metrics
-player_metrics = runs.df.groupby(['player', 'team_name']).agg(
+player_metrics = runs.df.groupby(['player', 'team_name', 'player_label']).agg(
     avg_run_angle=('run_angle', 'mean'),
     avg_abs_run_angle=('absolute_run_angle', 'mean'),
     runs_in_opposition_box=('runs_in_opposition_box', 'sum'),  

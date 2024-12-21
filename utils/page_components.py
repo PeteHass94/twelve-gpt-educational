@@ -189,7 +189,12 @@ def select_runs(container, player_run_counts_df, runs_obj):
     with container:
         # Select a player from the list
         player_list = player_run_counts_df['player'].tolist()
-        selected_player = st.selectbox("Select a player to view their runs:", player_list)
+        player_label_list = player_run_counts_df['player_label'].tolist()
+        
+        # Create a dictionary mapping players to their labels
+        player_label_mapping = dict(zip(player_list, player_label_list))
+        
+        selected_player = st.selectbox("Select a player to view their runs:", player_list, format_func=lambda player: player_label_mapping[player])
 
     # Fetch the detailed runs for the selected player
     detailed_runs = runs_obj.filter_runs_by_player(selected_player)
