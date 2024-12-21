@@ -614,32 +614,7 @@ class DistributionPlotRuns(Visual):
             zerolinecolor=rgb_to_color(self.medium_green),
         )
 
-    # def add_group_data(self, df_plot):
-    #     """
-    #     Add all players' data points to the plot.
 
-    #     Args:
-    #         df_plot (pd.DataFrame): DataFrame with all player metrics.
-    #     """
-    #     for i, metric in enumerate(self.metrics):
-    #         # Generate hover text for each data point
-    #         hover_text = df_plot[metric].apply(lambda x: f"{metric}: {x:.2f}").tolist()
-            
-    #         # Add scatter trace for this metric
-    #         self.fig.add_trace(
-    #             go.Scatter(
-    #                 x=df_plot[f"{metric}_Z"],
-    #                 y=np.ones(len(df_plot)) * i,
-    #                 mode="markers",
-    #                 marker=dict(
-    #                     color=rgb_to_color(self.bright_green, opacity=0.2),
-    #                     size=10,
-    #                 ),
-    #                 hovertext=hover_text,  # Use hover text here
-    #                 name="Other players",
-    #                 showlegend=(i == 0),
-    #             )
-    #         )
     def add_group_data(self, df_plot):
         """
         Add all players' data points to the plot.
@@ -662,7 +637,8 @@ class DistributionPlotRuns(Visual):
                     mode="markers",
                     marker=dict(
                         color=rgb_to_color(self.bright_green, opacity=0.2),
-                        size=10,
+                        size=10
+                                                
                     ),
                     hovertext=hover_text,  # Use hover text here
                     name="Other players",
@@ -679,7 +655,8 @@ class DistributionPlotRuns(Visual):
                 font=dict(
                     color=rgb_to_color(self.white, 0.8),
                     size=12 * self.font_size_multiplier,
-                    family="Arial"
+                    family="Arial",
+                    
                 ),
                 xref="x",
                 yref="y",
@@ -708,6 +685,8 @@ class DistributionPlotRuns(Visual):
                         color=rgb_to_color(color, opacity=0.7),
                         size=12,
                         symbol=marker,
+                        line_width=1.5,
+                        line_color=rgb_to_color(color)
                     ),
                     hovertemplate=f"{metric}: {player_metrics[metric]:.2f}",
                     name=player_name,

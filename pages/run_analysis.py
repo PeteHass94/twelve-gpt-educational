@@ -1,15 +1,9 @@
 # Library imports
 import streamlit as st
-import pandas as pd
 import numpy as np
-import plotly.express as px
-import argparse
-import tiktoken
-import os
+
 from utils.utils import normalize_text
-import matplotlib.pyplot as plt
-from matplotlib.colors import Normalize, LinearSegmentedColormap
-from mplsoccer import Pitch
+
 from classes.visual import DistributionPlotRuns
 
 from classes.data_source import RunStats 
@@ -138,11 +132,12 @@ runs.df['run_angle'] = np.degrees(
     np.arctan2(abs(runs.df['delta_y']), runs.df['delta_x'])
 )
 runs.df['run_angle'] = runs.df['run_angle'] * runs.df['direction_angle']
-
+runs.df['absolute_run_angle'] = runs.df['run_angle'] * runs.df['direction_angle']
 
 # Calculate player metrics
 player_metrics = runs.df.groupby(['player', 'team_name']).agg(
-    run_angle=('run_angle', 'mean'),
+    avg_run_angle=('run_angle', 'mean'),
+    avg_abs_run_angle=('absolute_run_angle', 'mean'),
     runs_in_opposition_box=('runs_in_opposition_box', 'sum'),  
     forward_runs=('forward_runs', 'sum'),  
     max_speed=('max_speed', 'max'),
@@ -153,7 +148,8 @@ player_metrics = runs.df.groupby(['player', 'team_name']).agg(
 
 
 # Add Z-scores for selected metrics
-metrics = ['forward_runs', 'max_speed', 'avg_speed', 'avg_distance', 'total_distance', 'run_angle']
+metrics = ['forward_runs', 'max_speed', 'avg_speed', 'avg_distance', 'total_distance', 'avg_run_angle', 'avg_abs_run_angle']
+metrics = metrics[::-1]
 for metric in metrics:
     if metric in player_metrics.columns:
         player_metrics[f"{metric}_Z"] = (player_metrics[metric] - player_metrics[metric].mean()) / player_metrics[metric].std()
@@ -163,9 +159,6 @@ for metric in metrics:
 selected_player, detailed_runs_df = select_runs(
     sidebar_container, player_metrics, runs
 )
-
-
-
 
 
 # Filter the runs for the selected player
@@ -211,14 +204,15 @@ distribution_plot.add_player(
 )
 
 # Display the distribution plot
-st.subheader("Distribution of Run Metrics")
+st.subheader("Distribution Plot of Run Metrics")
 distribution_plot.show()
 
 # Description of player metrics with bold formatting for stats
 description_text = (
     f"{selected_player} recorded **{selected_player_data['forward_runs']} forward runs**, "
     f"with a maximum speed of **{selected_player_data['max_speed']:.2f} m/s** and an average speed of **{selected_player_data['avg_speed']:.2f} m/s**. "
-    f"The average distance covered per run was **{selected_player_data['avg_distance']:.2f} meters** and total distance was **{selected_player_data['total_distance']:.2f} meters**."
+    f"The average distance covered per run was **{selected_player_data['avg_distance']:.2f} meters** and total distance was **{selected_player_data['total_distance']:.2f} meters**. "
+    f"The average run angle of their runs was **{selected_player_data['avg_run_angle']:.2f}°** and average absolute value of the run angle was **{selected_player_data['avg_abs_run_angle']:.2f}°**."
 )
 
 
