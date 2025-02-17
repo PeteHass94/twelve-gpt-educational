@@ -1,4 +1,7 @@
-# TwelveGPT Educational
+# Twelve Projects
+
+Built on TwelveGPT's Educational streamlit app, I am using this to showcase the applications I learned during my 12 week course with Twelve.
+
 
 ## Description
 
